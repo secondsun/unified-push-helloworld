@@ -51,6 +51,7 @@ public class HelloWorldApplication extends Application {
     public void sendMetric(UnifiedPushMetricsMessage metricsMessage, Callback<UnifiedPushMetricsMessage> callback) {
         AeroGearGCMPushRegistrar registrar = (AeroGearGCMPushRegistrar)
                 RegistrarManager.getRegistrar(PUSH_REGISTER_NAME);
+
         registrar.sendMetrics(metricsMessage, callback);
     }
 

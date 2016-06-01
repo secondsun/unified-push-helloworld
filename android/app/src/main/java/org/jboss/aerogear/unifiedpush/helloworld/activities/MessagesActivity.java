@@ -17,20 +17,31 @@
 package org.jboss.aerogear.unifiedpush.helloworld.activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import org.jboss.aerogear.android.core.Callback;
 import org.jboss.aerogear.android.unifiedpush.MessageHandler;
+import org.jboss.aerogear.android.unifiedpush.PushRegistrar;
 import org.jboss.aerogear.android.unifiedpush.RegistrarManager;
+import org.jboss.aerogear.android.unifiedpush.gcm.AeroGearGCMPushJsonConfiguration;
 import org.jboss.aerogear.android.unifiedpush.gcm.UnifiedPushMessage;
 import org.jboss.aerogear.android.unifiedpush.metrics.UnifiedPushMetricsMessage;
 import org.jboss.aerogear.unifiedpush.helloworld.HelloWorldApplication;
 import org.jboss.aerogear.unifiedpush.helloworld.R;
 import org.jboss.aerogear.unifiedpush.helloworld.callback.MetricsCallback;
 import org.jboss.aerogear.unifiedpush.helloworld.handler.NotificationBarMessageHandler;
+
+import static org.jboss.aerogear.unifiedpush.helloworld.HelloWorldApplication.PUSH_REGISTER_NAME;
 
 public class MessagesActivity extends AppCompatActivity implements MessageHandler {
 
@@ -52,6 +63,54 @@ public class MessagesActivity extends AppCompatActivity implements MessageHandle
         View emptyView = findViewById(R.id.empty);
         listView = (ListView) findViewById(R.id.messages);
         listView.setEmptyView(emptyView);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.categories, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.topic_1:
+            case R.id.topic_2:
+            case R.id.topic_3:
+                subscribeToCategory(item.getTitle());
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void subscribeToCategory(CharSequence title) {
+        RegistrarManager.config(PUSH_REGISTER_NAME, AeroGearGCMPushJsonConfiguration.class)
+                .loadConfigJson(getApplicationContext())
+                .addCategory(title.toString())
+                .asRegistrar();
+
+        PushRegistrar registrar = RegistrarManager.getRegistrar(PUSH_REGISTER_NAME);
+        registrar.register(getApplicationContext(), new Callback<Void>() {
+            @Override
+            public void onSuccess(Void data) {
+                Toast.makeText(getApplicationContext(),
+                        getApplicationContext().getString(R.string.registration_successful),
+                        Toast.LENGTH_LONG).show();
+
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.e("", e.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        getApplication().getString(R.string.registration_error),
+                        Toast.LENGTH_LONG).show();
+                finish();
+            }
+        });
     }
 
     @Override
