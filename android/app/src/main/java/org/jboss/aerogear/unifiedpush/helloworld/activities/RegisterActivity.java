@@ -63,7 +63,7 @@ public class RegisterActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Exception e) {
-                Log.e(TAG, e.getMessage());
+                Log.e(TAG, e.getMessage(), e);
                 Toast.makeText(getApplicationContext(),
                         getApplication().getString(R.string.registration_error),
                         Toast.LENGTH_LONG).show();
